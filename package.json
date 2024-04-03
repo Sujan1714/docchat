@@ -23,12 +23,15 @@
     "@trpc/react-query": "^11.0.0-next.327",
     "@trpc/server": "^11.0.0-next.327",
     "@uploadthing/react": "^6.4.1",
+    "amqplib": "^0.10.3",
     "base": "^3.0.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "date-fns": "^3.6.0",
     "lucide-react": "^0.363.0",
     "next": "14.1.4",
+    "nvm": "^0.0.4",
+    "pdfjs": "^2.5.3",
     "react": "^18",
     "react-dom": "^18",
     "react-dropzone": "^14.2.3",
@@ -38,6 +41,7 @@
     "tailwind-merge": "^2.2.2",
     "tailwindcss-animate": "^1.0.7",
     "uploadthing": "^6.7.0",
+    "uuid": "^9.0.1",
     "zod": "^3.22.4"
   },
   "devDependencies": {
