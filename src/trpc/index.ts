@@ -3,7 +3,7 @@ import { privateProcedure, publicProcedure, router } from './trpc';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 import { TRPCError } from '@trpc/server';
 import { db } from '@/db';
-import { z } from 'zod'
+import { object, z } from 'zod'
 
 export const appRouter = router({
     authCallback: publicProcedure.query(async () => {
@@ -39,6 +39,22 @@ export const appRouter = router({
                 userId,
             }
         })
+    }),
+
+    getFileUploadStatus: privateProcedure
+    .input(z.object({ fileId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const file = await db.file.findFirst({
+        where: {
+          id: input.fileId,
+          userId: ctx.userId,
+        },
+      })
+
+      if (!file) 
+        return { status: "PENDING" as const }
+
+      return { status: file.uploadStatus }
     }),
 
 
