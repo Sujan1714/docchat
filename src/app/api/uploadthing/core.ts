@@ -34,6 +34,8 @@ export const ourFileRouter = {
 
       try {
         const response = await fetch (`https://utfs.io/f/${file.key}`)
+        
+        console.log('got  file')
         const blob = await response.blob()
 
         const loader = new PDFLoader(blob)
@@ -41,17 +43,18 @@ export const ourFileRouter = {
         const pageLevelDocs = await loader.load()
         const pagesAmt = pageLevelDocs.length
 
-       
+        
         const pineconeIndex = pinecone.Index('docchat')
 
         const embeddings = new OpenAIEmbeddings({
-          openAIApiKey: process.env.OPENAI_API_KEY
+          openAIApiKey: process.env.OPENAI_API_KEY,
         })
 
-        await PineconeStore.fromDocuments(pageLevelDocs,embeddings, {
+        await PineconeStore.fromDocuments(
+          pageLevelDocs,
+          embeddings, {
           pineconeIndex,
           namespace: createdFile.id,
-
         }
       )
 
@@ -61,7 +64,7 @@ export const ourFileRouter = {
         },
         where:{
           id:createdFile.id
-        }
+        },
       })
 
       } catch (err) {
@@ -71,7 +74,7 @@ export const ourFileRouter = {
           },
           where:{
             id:createdFile.id
-          }
+          },
         })
         
       }
