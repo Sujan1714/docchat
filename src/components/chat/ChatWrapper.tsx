@@ -6,6 +6,7 @@ import Messages from "./Messages"
 import { ChevronLeft, Loader2, XCircle } from "lucide-react"
 import Link from "next/link"
 import { buttonVariants } from "../ui/button"
+import { ChatContextProvider } from "./ChatContext"
 
 interface ChatWrapperProps {
     fileId: string
@@ -34,7 +35,8 @@ const ChatWrapper = ({fileId}: ChatWrapperProps) => {
     )
 
 
-if (isLoading) return (
+if (isLoading) 
+    return (
     <div className={"relative min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2"}>
         <div className={"flex-1 flex justify-center items-center flex-col mb-28"}>
             <div className={"flex flex-col items-center gap-2"}>
@@ -51,7 +53,8 @@ if (isLoading) return (
     </div>
 )
 
-if (data?.status === 'PROCESSING') return (
+if (data?.status === 'PROCESSING') 
+    return (
     <div className={"relative min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2"}>
         <div className={"flex-1 flex justify-center items-center flex-col mb-28"}>
             <div className={"flex flex-col items-center gap-2"}>
@@ -68,7 +71,8 @@ if (data?.status === 'PROCESSING') return (
     </div>
 )
 
-if (data?.status === 'FAILED') return (
+if (data?.status === 'FAILED') 
+    return (
     <div className={"relative min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2"}>
         <div className={"flex-1 flex justify-center items-center flex-col mb-28"}>
             <div className={"flex flex-col items-center gap-2"}>
@@ -89,15 +93,16 @@ if (data?.status === 'FAILED') return (
     )
 
     return (
-        <div className={"relative min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2"}>
-            <div className={"flex-1 justify-between flex flex-col mb-28"}>
-                <Messages />
+        <ChatContextProvider fileId={fileId}>
+          <div className="relative min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2">
+            <div className="flex-1 justify-between flex flex-col mb-28">
+              <Messages fileId={fileId} />
             </div>
-            <ChatInput isDisabled={false} />
-
-            </div>
-    )
-
-}
+    
+            <ChatInput />
+          </div>
+        </ChatContextProvider>
+      );
+    };
 
 export default ChatWrapper

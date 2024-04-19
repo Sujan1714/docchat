@@ -1,5 +1,4 @@
 import React, { ReactNode, createContext, useState } from "react";
-import { string } from "zod";
 import { useToast } from "../ui/use-toast";
 import { useMutation } from "@tanstack/react-query";
 
@@ -33,7 +32,7 @@ export const ChatContextProvider = ({fileId, children}: Props) => {
 
     const {mutate: sendMessage} = useMutation({
         mutationFn: async ({message}: {message: string}) => {
-            const response = await fetch("/api/message", {
+            const response = await fetch('/api/message', {
                 method: 'POST',
                 body: JSON.stringify({
                     fileId,

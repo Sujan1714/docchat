@@ -1,80 +1,80 @@
-import { db } from "@/db";
-import { SendMessageValidator } from "@/lib/validators/SendMessageValidator";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { OpenAIEmbeddings } from "@langchain/openai";
-import { NextRequest } from "next/server";
-import { pinecone } from '@/lib/pinecone'
 import { PineconeStore } from "@langchain/pinecone";
-import openai from "openai";
+import { OpenAIStream, StreamingTextResponse } from "ai";
+import { NextResponse, type NextRequest } from "next/server";
 
-import {OpenAIStream, StreamingTextResponse} from "ai"
+import { db } from "@/db";
+import { openai } from "@/lib/openai";
+import { pinecone } from "@/lib/pinecone";
+import { SendMessageValidator } from "@/lib/validators/SendMessageValidator";
 
-export const POST = async(req: NextRequest) => {
-    const body = await req.json()
+export async function POST(req: NextRequest) {
 
-    const {getUser} = getKindeServerSession()
-    const user =await getUser()
+  const body = await req.json();
 
-    const userId = user?.id
+  const { getUser } = getKindeServerSession();
+  const user = await getUser();
 
-    if (!userId) 
-        return new Response('Unauthorized', {status: 401})
+  if (!user?.id) return new NextResponse("Unauthorized.", { status: 401 });
 
-    const {fileId, message} = SendMessageValidator.parse(body)
-  
-    const file = await db.file.findFirst({
-        where: {
-            id: fileId,
-            userId,
-        },
-    })
+  const { id: userId } = user;
 
-    if(!file)
-        return new Response('Not found',{ status: 404})
+  const { fileId, message } = SendMessageValidator.parse(body);
 
-    await db.message.create({
-        data: {
-            text: message,
-            isUserMessage: true,
-            userId,
-            fileId,
-        },
-    })
+  const file = await db.file.findUnique({
+    where: {
+      id: fileId,
+      userId,
+    },
+  });
 
-    const embeddings = new OpenAIEmbeddings({
-        openAIApiKey: process.env.OPENAI_API_KEY,
-    })
+  if (!file) return new NextResponse("Not Found.", { status: 404 });
 
-    
-    const pineconeIndex = pinecone.Index('docchat')
+  await db.message.create({
+    data: {
+      text: message,
+      isUserMessage: true,
+      userId,
+      fileId,
+    },
+  });
 
-    const vectorStore = await PineconeStore.fromExistingIndex(embeddings,{
-        pineconeIndex,
-        namespace: file.id
-    })
+  // vectorize message
+  const embeddings = new OpenAIEmbeddings({
+    openAIApiKey: process.env.OPENAI_API_KEY!,
+  });
 
-    const results = await vectorStore.similaritySearch(message, 4)
+  const pineconeIndex = pinecone.Index("quill");
 
-    const prevMessage = await db.message.findMany({
-        where: {
-            fileId
-        },
-        orderBy: {
-            createdAt: "asc"
-        },
-        take: 6
-    })
+  const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
+    pineconeIndex,
+    namespace: fileId,
+  });
 
-    const formattedPrevMessages = prevMessage.map((msg) => ({
-        role: msg.isUserMessage ? "user" as const : "assistant" as const,
-        content: msg.text
-    }));
-    
-    const response = await openai.Chat.Completions.create({
-        model: 'gpt-3.5-turbo',
-        temperature: 0,
-        stream: true,
-        messages: [
+  const results = await vectorStore.similaritySearch(message, 4);
+
+  const prevMessages = await db.message.findMany({
+    where: {
+      fileId,
+      userId: user.id,
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+    take: 6,
+  });
+
+  const formattedPrevMessages = prevMessages.map((msg) => ({
+    role: msg.isUserMessage ? ("user" as const) : ("assistant" as const),
+    content: msg.text,
+  }));
+
+  const response = await openai.chat.completions.create({
+    model: "gpt-3.5-turbo",
+    temperature: 0,
+    stream: true,
+    messages: [
             {
               role: 'system',
               content:
@@ -118,3 +118,10 @@ export const POST = async(req: NextRequest) => {
     return new StreamingTextResponse(stream)
 
 }
+
+
+
+
+
+
+
