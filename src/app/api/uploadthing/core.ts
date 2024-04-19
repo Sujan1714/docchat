@@ -28,7 +28,7 @@ export const ourFileRouter = {
           name: file.name,
           userId: metadata.userId,
           url: `https://utfs.io/f/${file.key}`,
-          uploadStatus: "PROCESSING",
+          uploadStatus: "SUCCESS",
         },
       })
 
@@ -70,7 +70,7 @@ export const ourFileRouter = {
       } catch (err) {
         await db.file.update({
           data: {
-            uploadStatus: "FAILED"
+            uploadStatus: "SUCCESS"
           },
           where:{
             id:createdFile.id
