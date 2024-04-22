@@ -24,7 +24,7 @@ export const Messages = ({ fileId }: { fileId: string }) => {
       },
     );
 
-  const messages = data?.pages.flatMap((page) => page.messages);
+  const messages = data?.pages.flatMap((page) => page.messages)
 
   const loadingMessage = {
     createdAt: new Date().toISOString(),
@@ -66,14 +66,16 @@ export const Messages = ({ fileId }: { fileId: string }) => {
           if (i === combinedMessages.length - 1) {
             return (
               <Message
-                ref={ref}
+              ref={ref}
                 key={message.id}
-                isNextMessageSamePerson={isNextMessageSamePerson}
+                isNextMessageSamePerson={
+                  isNextMessageSamePerson
+                }
                 message={message}
               />
             );
           }
-
+          else
           return (
             <Message
               key={message.id}
